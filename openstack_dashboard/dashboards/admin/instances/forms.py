@@ -34,6 +34,8 @@ class LiveMigrateForm(forms.SelfHandlingForm):
                                           initial=False, required=False)
     block_migration = forms.BooleanField(label=_("Block Migration"),
                                          initial=False, required=False)
+    post_copy = forms.BooleanField(label=_("Post-copy Migration"),
+                                   initial=False, required=False)
 
     def __init__(self, request, *args, **kwargs):
         super(LiveMigrateForm, self).__init__(request, *args, **kwargs)
@@ -62,11 +64,13 @@ class LiveMigrateForm(forms.SelfHandlingForm):
         try:
             block_migration = data['block_migration']
             disk_over_commit = data['disk_over_commit']
+            post_copy = data['post_copy']
             api.nova.server_live_migrate(request,
                                          data['instance_id'],
                                          data['host'],
                                          block_migration=block_migration,
-                                         disk_over_commit=disk_over_commit)
+                                         disk_over_commit=disk_over_commit,
+                                         post_copy=post_copy)
             msg = _('The instance is preparing the live migration '
                     'to host "%s".') % data['host']
             messages.success(request, msg)
