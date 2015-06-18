@@ -30,6 +30,7 @@ from novaclient import exceptions as nova_exceptions
 from novaclient.v1_1 import client as nova_client
 from novaclient.v1_1.contrib import instance_action as nova_instance_action
 from novaclient.v1_1.contrib import list_extensions as nova_list_extensions
+from novaclient.v1_1.contrib import disaster_recovery as nova_disaster_recovery 
 from novaclient.v1_1 import security_group_rules as nova_rules
 from novaclient.v1_1 import security_groups as nova_security_groups
 from novaclient.v1_1 import servers as nova_servers
@@ -553,6 +554,14 @@ def server_create(request, name, image, flavor, key_name, user_data,
 
 def server_delete(request, instance):
     novaclient(request).servers.delete(instance)
+
+def server_protect(request, instance):
+    nova_disaster_recovery.DisasterRecoveryManager(
+                               novaclient(request)).protect_vm(instance)
+
+def volume_protect(request, volume):
+    nova_disaster_recovery.DisasterRecoveryManager(
+                               novaclient(request)).protect_volume(volume)
 
 
 def server_get(request, instance_id):

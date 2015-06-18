@@ -32,7 +32,7 @@ from openstack_dashboard import policy
 
 
 DELETABLE_STATES = ("available", "error", "error_extending")
-
+PROTECTABLE_STATES = ("available","in-use")
 
 class VolumePolicyTargetMixin(policy.PolicyTargetMixin):
     policy_target_attrs = (("project_id", 'os-vol-tenant-attr:tenant_id'),)
@@ -348,6 +348,37 @@ class VolumesFilterAction(tables.FilterAction):
         return [volume for volume in volumes
                 if q in volume.name.lower()]
 
+class ProtectVolume(VolumePolicyTargetMixin, tables.BatchAction):
+    name = "protect"
+
+    @staticmethod
+    def action_present(count):
+        return ungettext_lazy(
+            u"Protect Volume",
+            u"Protecting Volumes",
+            count
+        )
+
+    @staticmethod
+    def action_past(count):
+        return ungettext_lazy(
+            u"Scheduled protection of Volume",
+            u"Scheduled protection of Volumes",
+            count
+        )
+
+    policy_rules = (("volume", "volume:protect"),)
+
+    def action(self, request, obj_id):
+        api.nova.volume_protect(request, obj_id)
+
+    def allowed(self, request, volume=None):
+        if volume:
+            return volume.status in PROTECTABLE_STATES
+        return False
+
+
+
 
 class VolumesTable(VolumesTableBase):
     name = tables.Column("name",
@@ -374,7 +405,7 @@ class VolumesTable(VolumesTableBase):
         table_actions = (CreateVolume, DeleteVolume, VolumesFilterAction)
         row_actions = (EditVolume, ExtendVolume, LaunchVolume, EditAttachments,
                        CreateSnapshot, CreateBackup, RetypeVolume,
-                       UploadToImage, DeleteVolume)
+                       UploadToImage, DeleteVolume, ProtectVolume)
 
 
 class DetachVolume(tables.BatchAction):

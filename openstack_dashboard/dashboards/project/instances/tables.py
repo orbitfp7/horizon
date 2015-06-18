@@ -713,6 +713,46 @@ class StopInstance(policy.PolicyTargetMixin, tables.BatchAction):
         api.nova.server_stop(request, obj_id)
 
 
+def is_nonactive_or_protected(instance):
+    protect_state = getattr(instance, "OS-EXT-STS:protect_state", None)
+    if instance.status in ACTIVE_STATES:
+        return (protect_state.lower() == "protecting" or 
+                protect_state.lower() == "protected")
+    return True
+
+
+class ProtectInstance(policy.PolicyTargetMixin, tables.BatchAction):
+    name = "protect"
+    classes = ("btn-danger",)
+    icon = "off"
+    policy_rules = (("compute", "compute:protect"),)
+
+    @staticmethod
+    def action_present(count):
+        return ungettext_lazy(
+            u"Protect Instance",
+            u"Protect Instances",
+            count
+        )
+
+    @staticmethod
+    def action_past(count):
+        return ungettext_lazy(
+            u"Scheduled protection of Instance",
+            u"Scheduled protection of Instances",
+            count
+        )
+
+    def allowed(self, request, instance=None):
+        """Allow terminate action if instance is active and 
+        not already protected."""
+        return not is_nonactive_or_protected(instance)
+
+    def action(self, request, obj_id):
+        api.nova.server_protect(request, obj_id)
+
+
+
 def get_ips(instance):
     template_name = 'project/instances/_instance_ips.html'
     context = {"instance": instance}
@@ -935,4 +975,5 @@ class InstancesTable(tables.DataTable):
                        DecryptInstancePassword, EditInstanceSecurityGroups,
                        ConsoleLink, LogLink, TogglePause, ToggleSuspend,
                        ResizeLink, SoftRebootInstance, RebootInstance,
-                       StopInstance, RebuildInstance, TerminateInstance)
+                       StopInstance, RebuildInstance, TerminateInstance,
+                       ProtectInstance)
