@@ -75,6 +75,8 @@ class ProjectUsageTable(BaseUsageTable):
                            verbose_name=_("Time since created"),
                            filters=(filters.timesince_sortable,),
                            attrs={'data-type': 'timesince'})
+    ft_count = tables.Column(lambda u: len(u["ft_secondary_usage"]),
+                             verbose_name=_("Secondary instances"))
 
     def get_object_id(self, datum):
         return datum.get('instance_id', id(datum))
@@ -82,6 +84,6 @@ class ProjectUsageTable(BaseUsageTable):
     class Meta:
         name = "project_usage"
         verbose_name = _("Usage")
-        columns = ("instance", "vcpus", "disk", "memory", "uptime")
+        columns = ("instance", "ft_count", "vcpus", "disk", "memory", "uptime")
         table_actions = (CSVSummary,)
         multi_select = False

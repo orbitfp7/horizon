@@ -151,7 +151,9 @@ class NovaUsage(base.APIResourceWrapper):
                 'vcpus': getattr(self, "total_vcpus_usage", 0),
                 'vcpu_hours': self.vcpu_hours,
                 'local_gb': self.local_gb,
-                'disk_gb_hours': self.disk_gb_hours}
+                'disk_gb_hours': self.disk_gb_hours,
+                'ft_secondary_instances': self.ft_total_secondary_instances,
+                'ft_secondary_memory_mb': self.ft_secondary_memory_mb}
 
     @property
     def total_active_instances(self):
@@ -179,6 +181,18 @@ class NovaUsage(base.APIResourceWrapper):
     @property
     def disk_gb_hours(self):
         return getattr(self, "total_local_gb_usage", 0)
+
+    @property
+    def ft_total_secondary_instances(self):
+        return sum(len(s.get('ft_secondary_usage', []))
+                   for s in self.server_usages if s['ended_at'] is None)
+
+    @property
+    def ft_secondary_memory_mb(self):
+        return sum(fts['memory_mb']
+                   for s in self.server_usages
+                   if s['ended_at'] is None and 'ft_secondary_usage' in s
+                   for fts in s['ft_secondary_usage'])
 
 
 class SecurityGroup(base.APIResourceWrapper):
