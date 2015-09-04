@@ -863,6 +863,14 @@ POWER_DISPLAY_CHOICES = (
     ("BUILDING", pgettext_lazy("Power state of an Instance", u"Building")),
 )
 
+FT_STATUS_DISPLAY_CHOICES = (
+    ("Primary", _("Enabled")),
+    ("missing_primary", _("Missing primary instance")),
+    ("missing_secondary", _("Missing secondary instance")),
+    ("secondary", _("Secondary instance")),
+    ("not_ft", _("Not enabled")),
+)
+
 
 class InstancesFilterAction(tables.FilterAction):
     filter_type = "server"
@@ -886,9 +894,22 @@ class InstancesTable(tables.DataTable):
         ("rescue", True),
         ("shelved_offloaded", True),
     )
+    FT_STATUS_CHOICES = (
+        ("primary", True),
+        ("missing_primary", False),
+        ("missing_secondary", False),
+        ("secondary", None),
+        ("not_ft", None),
+    )
     name = tables.Column("name",
                          link=("horizon:project:instances:detail"),
                          verbose_name=_("Instance Name"))
+    ft_status = tables.Column("ft_status",
+                              verbose_name=_("Fault tolerance"),
+                              classes=['fault_tolerance'],
+                              status=True,
+                              status_choices=FT_STATUS_CHOICES,
+                              display_choices=FT_STATUS_DISPLAY_CHOICES)
     image_name = tables.Column("image_name",
                                verbose_name=_("Image Name"))
     ip = tables.Column(get_ips,

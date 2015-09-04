@@ -314,6 +314,11 @@ class DetailView(tabs.TabView):
                 _('Unable to retrieve IP addresses from Neutron for instance '
                   '"%s".') % instance_id, ignore=True)
 
+        for (value, label) in project_tables.FT_STATUS_DISPLAY_CHOICES:
+            if value.lower() == instance.ft_status.lower():
+                instance.ft_status_label = label
+                break
+
         return instance
 
     def get_tabs(self, request, *args, **kwargs):
