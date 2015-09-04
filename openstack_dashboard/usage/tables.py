@@ -67,6 +67,13 @@ def get_instance_link(datum):
         return None
 
 
+def get_ft_count(datum):
+    if "ft_secondary_usage" in datum:
+        return len(datum["ft_secondary_usage"])
+    else:
+        return "-"
+
+
 class ProjectUsageTable(BaseUsageTable):
     instance = tables.Column('name',
                              verbose_name=_("Instance Name"),
@@ -75,7 +82,7 @@ class ProjectUsageTable(BaseUsageTable):
                            verbose_name=_("Time since created"),
                            filters=(filters.timesince_sortable,),
                            attrs={'data-type': 'timesince'})
-    ft_count = tables.Column(lambda u: len(u["ft_secondary_usage"]),
+    ft_count = tables.Column(get_ft_count,
                              verbose_name=_("Secondary instances"))
 
     def get_object_id(self, datum):
