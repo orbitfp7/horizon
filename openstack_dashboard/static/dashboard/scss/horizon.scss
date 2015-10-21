@@ -2323,3 +2323,16 @@ a:hover.link-popover { text-decoration: none; }
 .has-feedback .form-control-feedback {
   top: 0;
 }
+
+/**** Fault Tolerance Status ****/
+.table td.fault_tolerance.status_up { /* Primary with secondary */
+  color: #2e8b39;
+}
+
+.table td.fault_tolerance.status_down { /* Primary with no secondary */
+  color: #d2ca14;
+}
+
+.table td.fault_tolerance.status_unknown { /* Secondary */
+  color: #8b8787;
+}

@@ -87,7 +87,8 @@ class Server(base.APIResourceWrapper):
              'tenant_id', 'user_id', 'created', 'OS-EXT-STS:power_state',
              'OS-EXT-STS:task_state', 'OS-EXT-SRV-ATTR:instance_name',
              'OS-EXT-SRV-ATTR:host', 'OS-EXT-AZ:availability_zone',
-             'OS-DCF:diskConfig']
+             'OS-DCF:diskConfig', 'OS-EXT-FT:ft_status',
+             'OS-EXT-FT:ft_relations']
 
     def __init__(self, apiresource, request):
         super(Server, self).__init__(apiresource)
@@ -119,6 +120,15 @@ class Server(base.APIResourceWrapper):
     @property
     def availability_zone(self):
         return getattr(self, 'OS-EXT-AZ:availability_zone', "")
+
+    @property
+    def ft_status(self):
+        return getattr(self, 'OS-EXT-FT:ft_status', "")
+
+    @property
+    def ft_relations(self):
+        relations = getattr(self, 'OS-EXT-FT:ft_relations', {})
+        return relations.get('servers', [])
 
 
 class Hypervisor(base.APIDictWrapper):
@@ -152,7 +162,9 @@ class NovaUsage(base.APIResourceWrapper):
                 'vcpus': getattr(self, "total_vcpus_usage", 0),
                 'vcpu_hours': self.vcpu_hours,
                 'local_gb': self.local_gb,
-                'disk_gb_hours': self.disk_gb_hours}
+                'disk_gb_hours': self.disk_gb_hours,
+                'ft_secondary_instances': self.ft_total_secondary_instances,
+                'ft_secondary_memory_mb': self.ft_secondary_memory_mb}
 
     @property
     def total_active_instances(self):
@@ -180,6 +192,18 @@ class NovaUsage(base.APIResourceWrapper):
     @property
     def disk_gb_hours(self):
         return getattr(self, "total_local_gb_usage", 0)
+
+    @property
+    def ft_total_secondary_instances(self):
+        return sum(len(s.get('ft_secondary_usage', []))
+                   for s in self.server_usages if s['ended_at'] is None)
+
+    @property
+    def ft_secondary_memory_mb(self):
+        return sum(fts['memory_mb']
+                   for s in self.server_usages
+                   if s['ended_at'] is None and 'ft_secondary_usage' in s
+                   for fts in s['ft_secondary_usage'])
 
 
 class SecurityGroup(base.APIResourceWrapper):

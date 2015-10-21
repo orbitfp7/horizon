@@ -146,3 +146,29 @@
     {% endfor %}
     </dl>
 </div>
+
+<div class="row detail">
+  <h4>{% trans "Fault Tolerance" %}</h4>
+  <hr class="header_rule">
+  <dl>
+    <dt>{% trans "Status" %}</dt>
+    <dd>{{ instance.ft_status_label }}</dd>
+    {% if instance.ft_relations %}
+    {% if instance.ft_status == "secondary" %}
+    <dt>{% trans "Primary instance" %}</dt>
+    {% else %}
+    <dt>{% trans "Secondary instances" %}</dt>
+    {% endif %}
+    <dd>
+        <dl>
+            {% for relational_instance in instance.ft_relations %}
+            {% url 'horizon:project:instances:detail' relational_instance.id as relational_instance_url %}
+            <dd><a href="{{ relational_instance_url }}">{{ relational_instance.name }}</a></dd>
+            {% endfor %}
+        </dl>
+    </dd>
+    {% endif %}
+
+
+  </dl>
+</div>
