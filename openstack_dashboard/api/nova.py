@@ -87,7 +87,7 @@ class Server(base.APIResourceWrapper):
              'tenant_id', 'user_id', 'created', 'OS-EXT-STS:power_state',
              'OS-EXT-STS:task_state', 'OS-EXT-SRV-ATTR:instance_name',
              'OS-EXT-SRV-ATTR:host', 'OS-EXT-AZ:availability_zone',
-             'OS-DCF:diskConfig']
+             'OS-DCF:diskConfig', 'OS-EXT-DR:dr_state']
 
     def __init__(self, apiresource, request):
         super(Server, self).__init__(apiresource)
@@ -119,6 +119,10 @@ class Server(base.APIResourceWrapper):
     @property
     def availability_zone(self):
         return getattr(self, 'OS-EXT-AZ:availability_zone', "")
+
+    @property
+    def dr_state(self):
+        return getattr(self, 'OS-EXT-DR:dr_state', "")
 
 
 class Hypervisor(base.APIDictWrapper):

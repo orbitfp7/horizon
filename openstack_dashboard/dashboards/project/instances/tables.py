@@ -903,6 +903,12 @@ POWER_DISPLAY_CHOICES = (
     ("BUILDING", pgettext_lazy("Power state of an Instance", u"Building")),
 )
 
+DR_STATE_DISPLAY_CHOICES = (
+    ("Disabled", _("Not enabled")),
+    ("Scheduled_Protection", _("Protection scheduled")),
+    ("Protected", _("Protected")),
+)
+
 
 class InstancesFilterAction(tables.FilterAction):
     filter_type = "server"
@@ -926,9 +932,20 @@ class InstancesTable(tables.DataTable):
         ("rescue", True),
         ("shelved_offloaded", True),
     )
+    DR_STATE_CHOICES = (
+        ("Disabled", True),
+        ("Scheduled_Protection", False),
+        ("Protected", False),
+    )
     name = tables.Column("name",
                          link=("horizon:project:instances:detail"),
                          verbose_name=_("Instance Name"))
+    dr_state = tables.Column("dr_state",
+                             verbose_name=_("Disaster tolerance"),
+                             classes=['disaster_tolerance'],
+                             status=True,
+                             status_choices=DR_STATE_CHOICES,
+                             display_choices=DR_STATE_DISPLAY_CHOICES)
     image_name = tables.Column("image_name",
                                verbose_name=_("Image Name"))
     ip = tables.Column(get_ips,
